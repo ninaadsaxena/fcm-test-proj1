@@ -4,12 +4,12 @@ importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compa
 
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: "your-api-key",
-  authDomain: "your-project.firebaseapp.com",
+  apiKey: "your-api-key-here",
+  authDomain: "your-project-id.firebaseapp.com",
   projectId: "your-project-id",
-  storageBucket: "your-project.appspot.com",
+  storageBucket: "your-project-id.appspot.com",
   messagingSenderId: "123456789",
-  appId: "your-app-id"
+  appId: "1:123456789:web:abcdef123456"
 };
 
 // Initialize Firebase
