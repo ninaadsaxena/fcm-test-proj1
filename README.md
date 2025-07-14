@@ -25,8 +25,11 @@ A minimal functional project to test Firebase Cloud Messaging (FCM) with Django 
 ```bash
 cd backend
 
-# Activate virtual environment
-source venv/bin/activate
+# Activate virtual environment (Windows)
+venv\Scripts\activate
+
+# Or for Linux/Mac:
+# source venv/bin/activate
 
 # Install dependencies (already done if you followed the artifact)
 pip install -r requirements.txt
