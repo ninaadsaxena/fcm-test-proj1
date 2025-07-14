@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { messaging, vapidKey, getToken, onMessage } from '../firebase-config';
 
-const BACKEND_URL = 'https://localhost:8000/api';
+const BACKEND_URL = 'http://localhost:8000/api';
 
 export const useNotifications = () => {
   const [fcmToken, setFcmToken] = useState(null);
