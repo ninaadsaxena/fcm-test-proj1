@@ -47,10 +47,15 @@ export const useNotifications = () => {
   const fetchNotifications = async () => {
     try {
       const response = await fetch(`${BACKEND_URL}/notifications/`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
       setNotifications(data);
     } catch (error) {
-      console.error('Error fetching notifications:', error);
+      console.error('Error fetching notifications:', error.message);
+      // Set empty array if backend is not available
+      setNotifications([]);
     }
   };
 
