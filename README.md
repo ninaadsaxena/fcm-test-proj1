@@ -36,12 +36,9 @@ setup.bat
 
 ### Option 2: Manual Setup
 
-#### 1. Clone and Install Dependencies
+#### 1. Backend Setup
 
 ```bash
-git clone <your-repo-url>
-cd fcm-test-project
-
 # Backend setup
 cd backend
 python3 -m venv venv
@@ -58,8 +55,14 @@ pip install -r requirements.txt
 # Setup database
 python manage.py migrate
 
-# Go back to root and install frontend dependencies
+# Return to root directory
 cd ..
+```
+
+#### 2. Frontend Setup
+
+```bash
+# Install frontend dependencies (from root directory)
 npm install
 ```
 
@@ -92,7 +95,7 @@ npm install
 ### 3. Environment Configuration
 
 #### Frontend Configuration
-Create `.env` file in the root directory:
+Create `.env` file in the root directory (same level as package.json):
 ```bash
 cp .env.example .env
 ```
@@ -120,7 +123,7 @@ FIREBASE_CREDENTIALS_PATH=firebase-service-account.json
 ```
 
 #### Service Worker Configuration
-Update `public/firebase-messaging-sw.js` with your actual Firebase config:
+The service worker is already configured in `public/firebase-messaging-sw.js`. You just need to update it with your Firebase config:
 ```javascript
 const firebaseConfig = {
   apiKey: "your-actual-api-key",
@@ -144,6 +147,7 @@ python manage.py runserver
 
 ### Start Frontend Server (Terminal 2)
 ```bash
+# From root directory
 npm run dev
 ```
 ✅ Frontend runs on: http://localhost:5173
@@ -216,44 +220,44 @@ GET /api/notifications/
 ```
 fcm-test-project/
 ├── backend/                          # Django backend
-│   ├── fcm_test/                    # Django project settings
+│   ├── fcm_test/                     # Django project settings
 │   │   ├── __init__.py
 │   │   ├── settings.py              # Django configuration
 │   │   ├── urls.py                  # URL routing
 │   │   ├── wsgi.py
 │   │   └── asgi.py
-│   ├── notifications/               # Django app for FCM
-│   │   ├── models.py               # NotificationLog model
-│   │   ├── views.py                # API endpoints
-│   │   ├── serializers.py          # DRF serializers
-│   │   ├── urls.py                 # App URL routing
-│   │   ├── admin.py                # Django admin config
-│   │   └── migrations/             # Database migrations
-│   ├── requirements.txt            # Python dependencies
-│   ├── .env.example               # Environment template
-│   ├── manage.py                  # Django management
+│   ├── notifications/                # Django app for FCM
+│   │   ├── models.py                # NotificationLog model
+│   │   ├── views.py                 # API endpoints
+│   │   ├── serializers.py           # DRF serializers
+│   │   ├── urls.py                  # App URL routing
+│   │   ├── admin.py                 # Django admin config
+│   │   └── migrations/              # Database migrations
+│   ├── requirements.txt             # Python dependencies
+│   ├── .env.example                 # Backend environment template
+│   ├── manage.py                    # Django management
 │   └── firebase-service-account.json  # (You add this)
-├── src/                            # React frontend source
-│   ├── components/                 # React components
-│   │   ├── NotificationForm.jsx   # Send notification form
-│   │   ├── NotificationList.jsx   # Display notifications
-│   │   └── Toast.jsx              # Toast notifications
-│   ├── hooks/                     # Custom React hooks
-│   │   └── useNotifications.js    # FCM logic hook
-│   ├── firebase-config.js         # Firebase initialization
-│   ├── App.tsx                    # Main app component
-│   ├── main.tsx                   # React entry point
-│   └── index.css                  # Tailwind styles
-├── public/                        # Static files
-│   ├── firebase-messaging-sw.js  # Service worker (update this)
-│   ├── icon-192x192.png          # Notification icon
-│   └── badge-72x72.png           # Notification badge
-├── .env.example                   # Frontend environment template
-├── package.json                   # Node.js dependencies
-├── vite.config.ts                # Vite configuration
-├── tailwind.config.js            # Tailwind configuration
-├── setup.sh                      # Linux/Mac setup script
-├── setup.bat                     # Windows setup script
+├── src/                              # React frontend source (root level)
+│   ├── components/                   # React components
+│   │   ├── NotificationForm.jsx     # Send notification form
+│   │   ├── NotificationList.jsx     # Display notifications
+│   │   └── Toast.jsx                # Toast notifications
+│   ├── hooks/                       # Custom React hooks
+│   │   └── useNotifications.js      # FCM logic hook
+│   ├── firebase-config.js           # Firebase initialization
+│   ├── App.tsx                      # Main app component
+│   ├── main.tsx                     # React entry point
+│   └── index.css                    # Tailwind styles
+├── public/                          # Static files
+│   ├── firebase-messaging-sw.js    # Service worker (update this)
+│   ├── icon-192x192.png            # Notification icon
+│   └── badge-72x72.png             # Notification badge
+├── .env.example                     # Frontend environment template
+├── package.json                     # Node.js dependencies
+├── vite.config.ts                   # Vite configuration
+├── tailwind.config.js               # Tailwind configuration
+├── setup.sh                        # Linux/Mac setup script
+├── setup.bat                       # Windows setup script
 └── README.md                     # This file
 ```
 
