@@ -1,21 +1,19 @@
 # FCM Test Project
 
-A minimal functional project to test Firebase Cloud Messaging (FCM) with Django backend and React frontend.
+A complete Firebase Cloud Messaging (FCM) implementation with Django REST API backend and React frontend. Test push notifications in both foreground and background modes.
 
 ## 🔧 Tech Stack
 
-- **Backend**: Django (Python) with Firebase Admin SDK
-- **Frontend**: React (JavaScript) with Firebase SDK
+- **Backend**: Django 4.2 + Django REST Framework + Firebase Admin SDK
+- **Frontend**: React 18 + Vite + Tailwind CSS + Firebase SDK
 - **Push Notifications**: Firebase Cloud Messaging (FCM)
+- **Database**: SQLite (development)
 
 ## 📋 Prerequisites
 
-1. **Python 3.8+** and **Node.js 16+** installed
-2. **Firebase Project Setup**:
-   - Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
-   - Enable Cloud Messaging
-   - Generate a service account private key (JSON file)
-   - Get your web app configuration and VAPID key
+- **Python 3.8+** installed
+- **Node.js 16+** and npm installed
+- **Firebase Project** with Cloud Messaging enabled
 
 ## 🚀 Quick Setup
 
@@ -23,100 +21,106 @@ A minimal functional project to test Firebase Cloud Messaging (FCM) with Django 
 
 **For Linux/Mac:**
 ```bash
+git clone <your-repo-url>
+cd fcm-test-project
 chmod +x setup.sh
 ./setup.sh
 ```
 
 **For Windows:**
 ```cmd
+git clone <your-repo-url>
+cd fcm-test-project
 setup.bat
 ```
 
 ### Option 2: Manual Setup
 
-#### 1. Backend Setup (Django)
+#### 1. Clone and Install Dependencies
 
 ```bash
-cd backend
+git clone <your-repo-url>
+cd fcm-test-project
 
-# Create virtual environment
+# Backend setup
+cd backend
 python3 -m venv venv
 
 # Activate virtual environment
 # Linux/Mac:
 source venv/bin/activate
 # Windows:
-# venv\Scripts\activate
+venv\Scripts\activate
 
-# Install dependencies
+# Install Python dependencies
 pip install -r requirements.txt
 
-# Run migrations
-python manage.py makemigrations
+# Setup database
 python manage.py migrate
-```
 
-#### 2. Frontend Setup (React)
-
-```bash
-# Install dependencies
+# Go back to root and install frontend dependencies
+cd ..
 npm install
 ```
 
-## ⚙️ Configuration
+## ⚙️ Firebase Configuration
 
-### 1. Firebase Configuration
+### 1. Create Firebase Project
 
-1. **Create Firebase Project**:
-   - Go to [Firebase Console](https://console.firebase.google.com/)
-   - Create a new project
-   - Enable Cloud Messaging
+1. Go to [Firebase Console](https://console.firebase.google.com/)
+2. Create a new project
+3. Enable **Cloud Messaging** in the project settings
 
-2. **Get Service Account Key**:
-   - Go to Project Settings > Service Accounts
-   - Click "Generate new private key"
-   - Save the JSON file as `firebase-service-account.json` in the `backend/` directory
+### 2. Get Firebase Configuration
 
-3. **Get Web App Config**:
-   - Go to Project Settings > General
-   - Add a web app if you haven't already
-   - Copy the Firebase configuration object
+#### Web App Configuration:
+1. Go to Project Settings → General
+2. Add a web app (if not already added)
+3. Copy the Firebase configuration object
 
-4. **Get VAPID Key**:
-   - Go to Project Settings > Cloud Messaging
-   - In the "Web configuration" section, generate a key pair
-   - Copy the VAPID key
+#### Service Account Key:
+1. Go to Project Settings → Service Accounts
+2. Click "Generate new private key"
+3. Download the JSON file
+4. Save it as `firebase-service-account.json` in the `backend/` directory
 
-### 2. Environment Variables
+#### VAPID Key:
+1. Go to Project Settings → Cloud Messaging
+2. In "Web configuration", generate a key pair
+3. Copy the VAPID key
 
-#### Backend Configuration
-```bash
-# Copy the example file
-cp backend/.env.example backend/.env
-
-# Edit backend/.env
-FIREBASE_CREDENTIALS_PATH=firebase-service-account.json
-```
+### 3. Environment Configuration
 
 #### Frontend Configuration
+Create `.env` file in the root directory:
 ```bash
-# Copy the example file
 cp .env.example .env
+```
 
-# Edit .env with your Firebase config
-VITE_FIREBASE_API_KEY=your-api-key
+Edit `.env` with your Firebase config:
+```env
+VITE_FIREBASE_API_KEY=your-api-key-here
 VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
 VITE_FIREBASE_PROJECT_ID=your-project-id
 VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
 VITE_FIREBASE_APP_ID=your-app-id
-VITE_FIREBASE_VAPID_KEY=your-vapid-key
+VITE_FIREBASE_VAPID_KEY=your-vapid-key-here
 ```
 
-### 3. Service Worker Configuration
+#### Backend Configuration
+Create `backend/.env` file:
+```bash
+cp backend/.env.example backend/.env
+```
 
-Update `public/firebase-messaging-sw.js` with your actual Firebase configuration:
+Edit `backend/.env`:
+```env
+FIREBASE_CREDENTIALS_PATH=firebase-service-account.json
+```
 
+#### Service Worker Configuration
+Update `public/firebase-messaging-sw.js` with your actual Firebase config:
 ```javascript
 const firebaseConfig = {
   apiKey: "your-actual-api-key",
@@ -130,110 +134,206 @@ const firebaseConfig = {
 
 ## 🏃‍♂️ Running the Application
 
-### Start Backend (Terminal 1)
+### Start Backend Server (Terminal 1)
 ```bash
 cd backend
 source venv/bin/activate  # Windows: venv\Scripts\activate
 python manage.py runserver
 ```
-Backend will run on: http://localhost:8000
+✅ Backend runs on: http://localhost:8000
 
-### Start Frontend (Terminal 2)
+### Start Frontend Server (Terminal 2)
 ```bash
 npm run dev
 ```
-Frontend will run on: http://localhost:5173
+✅ Frontend runs on: http://localhost:5173
 
-## 🧪 Testing FCM
+## 🧪 Testing FCM Notifications
 
-1. **Open the application** in your browser (http://localhost:5173)
-2. **Enable notifications** when prompted by the browser
-3. **Send a test notification** using the form in the app
-4. **Test background notifications** by minimizing the browser tab and sending another notification
+1. **Open the app** at http://localhost:5173
+2. **Allow notifications** when prompted by the browser
+3. **Send test notification** using the form
+4. **Test background notifications**:
+   - Minimize or switch to another tab
+   - Send another notification
+   - You should see a browser notification
 
-## 📡 API Endpoints
+## 📡 API Documentation
 
-### Backend (Django) - http://localhost:8000/api/
+### Backend Endpoints (http://localhost:8000/api/)
 
-- `POST /send-notification/` - Send FCM notification
-  ```json
+#### Send Notification
+```http
+POST /api/send-notification/
+Content-Type: application/json
+
+{
+  "title": "Test Notification",
+  "body": "This is a test message",
+  "topic": "all"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message_id": "projects/your-project/messages/0:1234567890"
+}
+```
+
+#### Get Notifications History
+```http
+GET /api/notifications/
+```
+
+**Response:**
+```json
+[
   {
+    "id": 1,
     "title": "Test Notification",
     "body": "This is a test message",
-    "topic": "all"
+    "timestamp": "2024-01-15T10:30:00Z"
   }
-  ```
-
-- `GET /notifications/` - Get last 10 notifications
+]
+```
 
 ## 🎯 Features
 
-- ✅ Send notifications from Django backend
-- ✅ Receive notifications in React frontend (foreground & background)
-- ✅ Toast notifications for foreground messages
-- ✅ Browser notifications for background messages
-- ✅ Notification logging in backend
-- ✅ Display notification history in frontend
-- ✅ Simple form to send test notifications
+- ✅ **Send notifications** from Django backend via REST API
+- ✅ **Receive notifications** in React frontend (foreground & background)
+- ✅ **Toast notifications** for foreground messages
+- ✅ **Browser notifications** for background messages
+- ✅ **Notification logging** and history in backend database
+- ✅ **Real-time notification list** in frontend
+- ✅ **Permission management** with status indicators
+- ✅ **Responsive design** with Tailwind CSS
+- ✅ **Topic-based messaging** support
 
 ## 📁 Project Structure
 
 ```
 fcm-test-project/
-├── backend/                    # Django backend
-│   ├── fcm_test/              # Django project
-│   ├── notifications/         # Django app
-│   ├── requirements.txt       # Python dependencies
-│   ├── .env.example          # Environment variables template
-│   └── manage.py             # Django management script
-├── src/                       # React frontend source
-├── public/                    # Static files
-│   └── firebase-messaging-sw.js  # Service worker
-├── .env.example              # Frontend environment template
-├── package.json              # Node.js dependencies
-├── setup.sh                  # Linux/Mac setup script
-├── setup.bat                 # Windows setup script
-└── README.md                 # This file
+├── backend/                          # Django backend
+│   ├── fcm_test/                    # Django project settings
+│   │   ├── __init__.py
+│   │   ├── settings.py              # Django configuration
+│   │   ├── urls.py                  # URL routing
+│   │   ├── wsgi.py
+│   │   └── asgi.py
+│   ├── notifications/               # Django app for FCM
+│   │   ├── models.py               # NotificationLog model
+│   │   ├── views.py                # API endpoints
+│   │   ├── serializers.py          # DRF serializers
+│   │   ├── urls.py                 # App URL routing
+│   │   ├── admin.py                # Django admin config
+│   │   └── migrations/             # Database migrations
+│   ├── requirements.txt            # Python dependencies
+│   ├── .env.example               # Environment template
+│   ├── manage.py                  # Django management
+│   └── firebase-service-account.json  # (You add this)
+├── src/                            # React frontend source
+│   ├── components/                 # React components
+│   │   ├── NotificationForm.jsx   # Send notification form
+│   │   ├── NotificationList.jsx   # Display notifications
+│   │   └── Toast.jsx              # Toast notifications
+│   ├── hooks/                     # Custom React hooks
+│   │   └── useNotifications.js    # FCM logic hook
+│   ├── firebase-config.js         # Firebase initialization
+│   ├── App.tsx                    # Main app component
+│   ├── main.tsx                   # React entry point
+│   └── index.css                  # Tailwind styles
+├── public/                        # Static files
+│   ├── firebase-messaging-sw.js  # Service worker (update this)
+│   ├── icon-192x192.png          # Notification icon
+│   └── badge-72x72.png           # Notification badge
+├── .env.example                   # Frontend environment template
+├── package.json                   # Node.js dependencies
+├── vite.config.ts                # Vite configuration
+├── tailwind.config.js            # Tailwind configuration
+├── setup.sh                      # Linux/Mac setup script
+├── setup.bat                     # Windows setup script
+└── README.md                     # This file
 ```
 
 ## 🔍 Troubleshooting
 
 ### Common Issues
 
-1. **"ModuleNotFoundError" in Python**:
-   - Make sure virtual environment is activated
-   - Run `pip install -r requirements.txt` again
+#### 1. Python/Django Issues
+```bash
+# ModuleNotFoundError
+cd backend
+source venv/bin/activate  # Ensure virtual env is active
+pip install -r requirements.txt
 
-2. **Notifications not working**:
-   - Check browser console for errors
-   - Ensure Firebase config is correct in both `.env` and service worker
-   - Verify notification permissions are granted
-   - Check that service worker is registered
+# Database issues
+python manage.py migrate
+```
 
-3. **CORS issues**:
-   - Ensure both servers are running on the correct ports
-   - Django CORS is configured for all origins in development
+#### 2. Firebase Configuration Issues
+```bash
+# Check your configuration files:
+# - .env (frontend config)
+# - backend/.env (backend config)  
+# - public/firebase-messaging-sw.js (service worker config)
+# - backend/firebase-service-account.json (service account)
+```
 
-4. **Firebase errors**:
-   - Verify Firebase project has Cloud Messaging enabled
-   - Check service account key file exists and is valid
-   - Ensure VAPID key is correct and matches your Firebase project
+#### 3. Notification Permission Issues
+- Ensure HTTPS in production (required for notifications)
+- Check browser console for permission errors
+- Try incognito mode to reset permissions
+- Verify VAPID key matches your Firebase project
 
-### Development Notes
+#### 4. CORS Issues
+- Backend CORS is configured for development
+- For production, update `CORS_ALLOW_ALL_ORIGINS` in `backend/fcm_test/settings.py`
 
-- This is a development setup with relaxed security settings
-- For production, implement proper CORS, authentication, and security measures
-- Service worker must be served over HTTPS in production
-- Notification permissions are required for FCM to work
+#### 5. Service Worker Issues
+```javascript
+// Check in browser console:
+navigator.serviceWorker.getRegistrations().then(registrations => {
+  console.log('Service Workers:', registrations);
+});
+```
+
+### Development Tips
+
+- **Check browser console** for detailed error messages
+- **Use browser dev tools** → Application → Service Workers to debug
+- **Test in incognito mode** to reset permissions and cache
+- **Verify Firebase project settings** match your configuration
+- **Check network tab** for API request/response details
+
+## 🚀 Production Deployment
+
+### Backend (Django)
+1. Set `DEBUG = False` in settings.py
+2. Configure proper database (PostgreSQL recommended)
+3. Set up proper CORS origins
+4. Use environment variables for sensitive data
+5. Deploy to platforms like Heroku, Railway, or DigitalOcean
+
+### Frontend (React)
+1. Build the project: `npm run build`
+2. Deploy `dist/` folder to Netlify, Vercel, or similar
+3. Ensure HTTPS (required for notifications)
+4. Update API URLs to production backend
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
+2. Create a feature branch: `git checkout -b feature-name`
 3. Make your changes
 4. Test thoroughly
 5. Submit a pull request
 
 ## 📄 License
 
-This project is for educational purposes. Use at your own discretion.
+This project is for educational and testing purposes. Use at your own discretion.
+
+---
+
+**Need help?** Check the troubleshooting section or open an issue on GitHub.
