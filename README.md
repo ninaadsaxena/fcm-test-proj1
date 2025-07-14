@@ -10,58 +10,100 @@ A minimal functional project to test Firebase Cloud Messaging (FCM) with Django 
 
 ## 📋 Prerequisites
 
-1. **Firebase Project Setup**:
+1. **Python 3.8+** and **Node.js 16+** installed
+2. **Firebase Project Setup**:
    - Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
    - Enable Cloud Messaging
    - Generate a service account private key (JSON file)
    - Get your web app configuration and VAPID key
 
-2. **Python 3.8+** and **Node.js 16+** installed
+## 🚀 Quick Setup
 
-## 🚀 Setup Instructions
+### Option 1: Automated Setup (Recommended)
 
-### 1. Backend Setup (Django)
+**For Linux/Mac:**
+```bash
+chmod +x setup.sh
+./setup.sh
+```
+
+**For Windows:**
+```cmd
+setup.bat
+```
+
+### Option 2: Manual Setup
+
+#### 1. Backend Setup (Django)
 
 ```bash
 cd backend
 
-# Activate virtual environment (Windows)
-venv\Scripts\activate
+# Create virtual environment
+python3 -m venv venv
 
-# Or for Linux/Mac:
-# source venv/bin/activate
+# Activate virtual environment
+# Linux/Mac:
+source venv/bin/activate
+# Windows:
+# venv\Scripts\activate
 
-# Install dependencies (already done if you followed the artifact)
+# Install dependencies
 pip install -r requirements.txt
 
-# Create .env file
-cp .env.example .env
-
-# Add your Firebase service account JSON file
-# Download from Firebase Console > Project Settings > Service Accounts
-# Save as 'firebase-service-account.json' in the backend directory
-
-# Update .env file
-FIREBASE_CREDENTIALS_PATH=firebase-service-account.json
-
-# Run migrations (already done if you followed the artifact)
+# Run migrations
 python manage.py makemigrations
 python manage.py migrate
-
-# Start Django server
-python manage.py runserver
 ```
 
-### 2. Frontend Setup (React)
+#### 2. Frontend Setup (React)
 
 ```bash
-# Install dependencies (already done if you followed the artifact)
-npm install firebase
+# Install dependencies
+npm install
+```
 
-# Create .env file
+## ⚙️ Configuration
+
+### 1. Firebase Configuration
+
+1. **Create Firebase Project**:
+   - Go to [Firebase Console](https://console.firebase.google.com/)
+   - Create a new project
+   - Enable Cloud Messaging
+
+2. **Get Service Account Key**:
+   - Go to Project Settings > Service Accounts
+   - Click "Generate new private key"
+   - Save the JSON file as `firebase-service-account.json` in the `backend/` directory
+
+3. **Get Web App Config**:
+   - Go to Project Settings > General
+   - Add a web app if you haven't already
+   - Copy the Firebase configuration object
+
+4. **Get VAPID Key**:
+   - Go to Project Settings > Cloud Messaging
+   - In the "Web configuration" section, generate a key pair
+   - Copy the VAPID key
+
+### 2. Environment Variables
+
+#### Backend Configuration
+```bash
+# Copy the example file
+cp backend/.env.example backend/.env
+
+# Edit backend/.env
+FIREBASE_CREDENTIALS_PATH=firebase-service-account.json
+```
+
+#### Frontend Configuration
+```bash
+# Copy the example file
 cp .env.example .env
 
-# Update .env with your Firebase config
+# Edit .env with your Firebase config
 VITE_FIREBASE_API_KEY=your-api-key
 VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
 VITE_FIREBASE_PROJECT_ID=your-project-id
@@ -69,31 +111,45 @@ VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
 VITE_FIREBASE_APP_ID=your-app-id
 VITE_FIREBASE_VAPID_KEY=your-vapid-key
+```
 
-# Update service worker with your Firebase config
-# Edit public/firebase-messaging-sw.js with your actual config
+### 3. Service Worker Configuration
 
-# Start React development server
+Update `public/firebase-messaging-sw.js` with your actual Firebase configuration:
+
+```javascript
+const firebaseConfig = {
+  apiKey: "your-actual-api-key",
+  authDomain: "your-project.firebaseapp.com",
+  projectId: "your-project-id",
+  storageBucket: "your-project.appspot.com",
+  messagingSenderId: "123456789",
+  appId: "your-app-id"
+};
+```
+
+## 🏃‍♂️ Running the Application
+
+### Start Backend (Terminal 1)
+```bash
+cd backend
+source venv/bin/activate  # Windows: venv\Scripts\activate
+python manage.py runserver
+```
+Backend will run on: http://localhost:8000
+
+### Start Frontend (Terminal 2)
+```bash
 npm run dev
 ```
+Frontend will run on: http://localhost:5173
 
 ## 🧪 Testing FCM
 
-1. **Start both servers**:
-   - Django: `python manage.py runserver` (http://localhost:8000)
-   - React: `npm run dev` (http://localhost:5173)
-
-2. **Enable notifications** in the browser when prompted
-
-3. **Send a test notification**:
-   - Fill out the form in the React app
-   - Click "Send Notification"
-   - You should see the notification appear as a toast in the browser
-
-4. **Test background notifications**:
-   - Minimize or switch to another tab
-   - Send another notification
-   - You should see a browser notification
+1. **Open the application** in your browser (http://localhost:5173)
+2. **Enable notifications** when prompted by the browser
+3. **Send a test notification** using the form in the app
+4. **Test background notifications** by minimizing the browser tab and sending another notification
 
 ## 📡 API Endpoints
 
@@ -110,16 +166,6 @@ npm run dev
 
 - `GET /notifications/` - Get last 10 notifications
 
-## 🔧 Configuration Files
-
-### Backend Configuration
-- `backend/.env` - Environment variables
-- `backend/firebase-service-account.json` - Firebase service account key
-
-### Frontend Configuration
-- `.env` - Firebase web app config and VAPID key
-- `public/firebase-messaging-sw.js` - Service worker for background notifications
-
 ## 🎯 Features
 
 - ✅ Send notifications from Django backend
@@ -130,26 +176,64 @@ npm run dev
 - ✅ Display notification history in frontend
 - ✅ Simple form to send test notifications
 
+## 📁 Project Structure
+
+```
+fcm-test-project/
+├── backend/                    # Django backend
+│   ├── fcm_test/              # Django project
+│   ├── notifications/         # Django app
+│   ├── requirements.txt       # Python dependencies
+│   ├── .env.example          # Environment variables template
+│   └── manage.py             # Django management script
+├── src/                       # React frontend source
+├── public/                    # Static files
+│   └── firebase-messaging-sw.js  # Service worker
+├── .env.example              # Frontend environment template
+├── package.json              # Node.js dependencies
+├── setup.sh                  # Linux/Mac setup script
+├── setup.bat                 # Windows setup script
+└── README.md                 # This file
+```
+
 ## 🔍 Troubleshooting
 
-1. **Notifications not working**:
+### Common Issues
+
+1. **"ModuleNotFoundError" in Python**:
+   - Make sure virtual environment is activated
+   - Run `pip install -r requirements.txt` again
+
+2. **Notifications not working**:
    - Check browser console for errors
-   - Ensure Firebase config is correct
-   - Verify service worker is registered
-   - Check notification permissions
+   - Ensure Firebase config is correct in both `.env` and service worker
+   - Verify notification permissions are granted
+   - Check that service worker is registered
 
-2. **CORS issues**:
+3. **CORS issues**:
+   - Ensure both servers are running on the correct ports
    - Django CORS is configured for all origins in development
-   - Ensure both servers are running on specified ports
 
-3. **Firebase errors**:
+4. **Firebase errors**:
    - Verify Firebase project has Cloud Messaging enabled
    - Check service account key file exists and is valid
-   - Ensure VAPID key is correct
+   - Ensure VAPID key is correct and matches your Firebase project
 
-## 📝 Notes
+### Development Notes
 
 - This is a development setup with relaxed security settings
 - For production, implement proper CORS, authentication, and security measures
 - Service worker must be served over HTTPS in production
 - Notification permissions are required for FCM to work
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## 📄 License
+
+This project is for educational purposes. Use at your own discretion.
