@@ -32,6 +32,16 @@ export const useNotifications = () => {
     if (messaging) {
       const unsubscribe = onMessage(messaging, (payload) => {
         console.log('Foreground message received:', payload);
+        
+        // Show browser notification for foreground messages
+        if (Notification.permission === 'granted') {
+          new Notification(payload.notification.title, {
+            body: payload.notification.body,
+            icon: '/icon-192x192.png',
+            badge: '/badge-72x72.png'
+          });
+        }
+        
         setToast({
           title: payload.notification.title,
           body: payload.notification.body,
