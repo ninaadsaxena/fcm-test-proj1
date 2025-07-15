@@ -237,7 +237,7 @@ fcm-test-project/
 │   ├── .env.example                 # Backend environment template
 │   ├── manage.py                    # Django management
 │   └── firebase-service-account.json  # (You add this)
-├── src/                              # React frontend source (root level)
+├── src/                              # React frontend source
 │   ├── components/                   # React components
 │   │   ├── NotificationForm.jsx     # Send notification form
 │   │   ├── NotificationList.jsx     # Display notifications
@@ -249,7 +249,7 @@ fcm-test-project/
 │   ├── main.tsx                     # React entry point
 │   └── index.css                    # Tailwind styles
 ├── public/                          # Static files
-│   ├── firebase-messaging-sw.js    # Service worker (update this)
+│   ├── firebase-messaging-sw.js    # Service worker (update with your config)
 │   ├── icon-192x192.png            # Notification icon
 │   └── badge-72x72.png             # Notification badge
 ├── .env.example                     # Frontend environment template
@@ -258,7 +258,7 @@ fcm-test-project/
 ├── tailwind.config.js               # Tailwind configuration
 ├── setup.sh                        # Linux/Mac setup script
 ├── setup.bat                       # Windows setup script
-└── README.md                     # This file
+└── README.md                        # This file
 ```
 
 ## 🔍 Troubleshooting
