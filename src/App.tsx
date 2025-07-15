@@ -4,6 +4,7 @@ import { useNotifications } from './hooks/useNotifications';
 import NotificationForm from './components/NotificationForm';
 import NotificationList from './components/NotificationList';
 import Toast from './components/Toast';
+import DebugPanel from './components/DebugPanel';
 
 function App() {
   const {
@@ -118,6 +119,9 @@ function App() {
 
       {/* Toast Notification */}
       <Toast notification={toast} onClose={() => setToast(null)} />
+
+      {/* Debug Panel */}
+      <DebugPanel fcmToken={fcmToken} permissionStatus={permissionStatus} />
     </div>
   );
 }

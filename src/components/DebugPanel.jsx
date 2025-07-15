@@ -1,0 +1,171 @@
+import React, { useState } from 'react';
+import { Bug, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+
+const DebugPanel = ({ fcmToken, permissionStatus }) => {
+  const [debugInfo, setDebugInfo] = useState([]);
+  const [isVisible, setIsVisible] = useState(false);
+
+  const addDebugInfo = (message, type = 'info') => {
+    const timestamp = new Date().toLocaleTimeString();
+    setDebugInfo(prev => [...prev, { message, type, timestamp }]);
+  };
+
+  const testNotificationAPI = async () => {
+    addDebugInfo('Testing notification API...', 'info');
+    
+    try {
+      const response = await fetch('http://localhost:8000/api/send-notification/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: 'Debug Test',
+          body: 'Testing notification system',
+          topic: 'all'
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        addDebugInfo(`✅ API Success: ${data.message_id}`, 'success');
+      } else {
+        addDebugInfo(`❌ API Error: ${response.status}`, 'error');
+      }
+    } catch (error) {
+      addDebugInfo(`❌ Network Error: ${error.message}`, 'error');
+    }
+  };
+
+  const testServiceWorker = async () => {
+    addDebugInfo('Checking service worker...', 'info');
+    
+    if ('serviceWorker' in navigator) {
+      try {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        addDebugInfo(`Service Workers: ${registrations.length} found`, 'info');
+        
+        registrations.forEach((reg, index) => {
+          addDebugInfo(`SW ${index + 1}: ${reg.scope}`, 'info');
+        });
+        
+        if (registrations.length === 0) {
+          addDebugInfo('❌ No service worker registered!', 'error');
+        }
+      } catch (error) {
+        addDebugInfo(`❌ SW Error: ${error.message}`, 'error');
+      }
+    } else {
+      addDebugInfo('❌ Service Worker not supported', 'error');
+    }
+  };
+
+  const testFirebaseMessaging = () => {
+    addDebugInfo('Testing Firebase Messaging...', 'info');
+    
+    // Check if Firebase messaging is available
+    if (window.firebase) {
+      addDebugInfo('✅ Firebase SDK loaded', 'success');
+    } else {
+      addDebugInfo('❌ Firebase SDK not loaded', 'error');
+    }
+
+    // Check FCM token
+    if (fcmToken) {
+      addDebugInfo(`✅ FCM Token: ${fcmToken.substring(0, 20)}...`, 'success');
+    } else {
+      addDebugInfo('❌ No FCM Token generated', 'error');
+    }
+
+    // Check permission
+    addDebugInfo(`Permission: ${permissionStatus}`, permissionStatus === 'granted' ? 'success' : 'error');
+  };
+
+  const clearDebug = () => {
+    setDebugInfo([]);
+  };
+
+  const getIcon = (type) => {
+    switch (type) {
+      case 'success': return <CheckCircle className="w-4 h-4 text-green-500" />;
+      case 'error': return <XCircle className="w-4 h-4 text-red-500" />;
+      case 'warning': return <AlertCircle className="w-4 h-4 text-yellow-500" />;
+      default: return <AlertCircle className="w-4 h-4 text-blue-500" />;
+    }
+  };
+
+  if (!isVisible) {
+    return (
+      <button
+        onClick={() => setIsVisible(true)}
+        className="fixed bottom-4 right-4 bg-red-600 text-white p-3 rounded-full shadow-lg hover:bg-red-700 z-50"
+        title="Debug Notifications"
+      >
+        <Bug className="w-5 h-5" />
+      </button>
+    );
+  }
+
+  return (
+    <div className="fixed bottom-4 right-4 bg-white border border-gray-300 rounded-lg shadow-xl p-4 max-w-md z-50 max-h-96 overflow-y-auto">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+          <Bug className="w-5 h-5" />
+          Debug Panel
+        </h3>
+        <button
+          onClick={() => setIsVisible(false)}
+          className="text-gray-400 hover:text-gray-600"
+        >
+          ×
+        </button>
+      </div>
+
+      <div className="space-y-2 mb-4">
+        <button
+          onClick={testFirebaseMessaging}
+          className="w-full bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700"
+        >
+          Test Firebase Setup
+        </button>
+        <button
+          onClick={testServiceWorker}
+          className="w-full bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700"
+        >
+          Test Service Worker
+        </button>
+        <button
+          onClick={testNotificationAPI}
+          className="w-full bg-purple-600 text-white px-3 py-2 rounded text-sm hover:bg-purple-700"
+        >
+          Test API Call
+        </button>
+        <button
+          onClick={clearDebug}
+          className="w-full bg-gray-600 text-white px-3 py-2 rounded text-sm hover:bg-gray-700"
+        >
+          Clear Log
+        </button>
+      </div>
+
+      <div className="space-y-1 text-xs">
+        {debugInfo.map((info, index) => (
+          <div key={index} className="flex items-start gap-2 p-2 bg-gray-50 rounded">
+            {getIcon(info.type)}
+            <div className="flex-1">
+              <div className="text-gray-800">{info.message}</div>
+              <div className="text-gray-500">{info.timestamp}</div>
+            </div>
+          </div>
+        ))}
+        {debugInfo.length === 0 && (
+          <div className="text-gray-500 text-center py-4">
+            Click buttons above to run tests
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default DebugPanel;
