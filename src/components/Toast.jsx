@@ -7,6 +7,7 @@ const Toast = ({ notification, onClose }) => {
       console.log('🍞 Toast notification displayed:', notification);
       
       const timer = setTimeout(() => {
+        console.log('⏰ Auto-closing toast notification');
         onClose();
       }, 6000); // Show for 6 seconds
 
@@ -26,7 +27,10 @@ const Toast = ({ notification, onClose }) => {
           <h4 className="font-semibold text-gray-900 text-sm">{notification.title}</h4>
         </div>
         <button
-          onClick={onClose}
+          onClick={() => {
+            console.log('❌ Toast manually closed');
+            onClose();
+          }}
           className="text-gray-400 hover:text-gray-600 focus:outline-none ml-2"
         >
           <X className="w-4 h-4" />
@@ -34,7 +38,7 @@ const Toast = ({ notification, onClose }) => {
       </div>
       <p className="text-gray-700 text-sm pl-6">{notification.body}</p>
       <div className="mt-2 pl-6">
-        <span className="text-xs text-blue-600 font-medium">New notification received</span>
+        <span className="text-xs text-blue-600 font-medium">📱 Notification received</span>
       </div>
     </div>
   );

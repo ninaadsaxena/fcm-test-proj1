@@ -12,18 +12,22 @@ export const useNotifications = () => {
   // Request notification permission and get FCM token
   const requestPermission = async () => {
     try {
+      console.log('🔔 Requesting notification permission...');
       const permission = await Notification.requestPermission();
       setPermissionStatus(permission);
-      console.log('Notification permission:', permission);
+      console.log('📋 Notification permission:', permission);
 
       if (permission === 'granted') {
+        console.log('✅ Permission granted, getting FCM token...');
         const token = await getToken(messaging, { vapidKey });
         setFcmToken(token);
-        console.log('FCM Token:', token);
+        console.log('🎫 FCM Token:', token);
         return token;
+      } else {
+        console.log('❌ Permission denied or dismissed');
       }
     } catch (error) {
-      console.error('Error getting permission:', error);
+      console.error('❌ Error getting permission:', error);
     }
     return null;
   };
@@ -31,6 +35,8 @@ export const useNotifications = () => {
   // Setup foreground message listener
   useEffect(() => {
     if (messaging) {
+      console.log('🎧 Setting up foreground message listener...');
+      
       const unsubscribe = onMessage(messaging, (payload) => {
         console.log('🔔 Foreground message received:', payload);
         
@@ -39,16 +45,19 @@ export const useNotifications = () => {
           body: payload.notification?.body || payload.data?.body || 'You have a new message',
         };
 
+        console.log('📱 Processed notification data:', notificationData);
+
         // Show toast notification in the app
         setToast(notificationData);
-        console.log('📱 Showing toast:', notificationData);
+        console.log('🍞 Toast notification set');
 
-        // Also show browser notification if page is visible
-        if (document.visibilityState === 'visible' && Notification.permission === 'granted') {
+        // Also show browser notification for immediate visibility
+        if (Notification.permission === 'granted') {
+          console.log('🌐 Creating browser notification...');
+          
           const browserNotification = new Notification(notificationData.title, {
             body: notificationData.body,
-            icon: '/icon-192x192.png',
-            badge: '/badge-72x72.png',
+            icon: '/vite.svg', // Using existing Vite icon
             tag: 'fcm-foreground',
             requireInteraction: false
           });
@@ -59,13 +68,16 @@ export const useNotifications = () => {
           }, 5000);
 
           browserNotification.onclick = () => {
+            console.log('🖱️ Browser notification clicked');
             window.focus();
             browserNotification.close();
           };
         }
         
         // Refresh notifications list
-        fetchNotifications();
+        setTimeout(() => {
+          fetchNotifications();
+        }, 500);
       });
 
       return unsubscribe;
@@ -75,13 +87,16 @@ export const useNotifications = () => {
   // Check initial permission status
   useEffect(() => {
     if ('Notification' in window) {
-      setPermissionStatus(Notification.permission);
+      const permission = Notification.permission;
+      setPermissionStatus(permission);
+      console.log('🔍 Initial permission status:', permission);
     }
   }, []);
 
   // Fetch notifications from backend
   const fetchNotifications = async () => {
     try {
+      console.log('📡 Fetching notifications from backend...');
       const response = await fetch(`${BACKEND_URL}/notifications/`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -90,7 +105,7 @@ export const useNotifications = () => {
       setNotifications(data);
       console.log('📋 Fetched notifications:', data);
     } catch (error) {
-      console.error('Error fetching notifications:', error.message);
+      console.error('❌ Error fetching notifications:', error.message);
       setNotifications([]);
     }
   };
@@ -131,6 +146,7 @@ export const useNotifications = () => {
 
   // Initial setup
   useEffect(() => {
+    console.log('🚀 Initializing notifications...');
     requestPermission();
     fetchNotifications();
   }, []);
