@@ -13,14 +13,20 @@ export const useNotifications = () => {
   const requestPermission = async () => {
     try {
       console.log('🔔 Requesting notification permission...');
+      console.log('🔍 Current permission status:', Notification.permission);
       
       // Register service worker first
       if ('serviceWorker' in navigator) {
         try {
           const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
           console.log('✅ Service Worker registered:', registration);
+          
+          // Wait for service worker to be ready
+          await navigator.serviceWorker.ready;
+          console.log('✅ Service Worker is ready');
         } catch (swError) {
           console.error('❌ Service Worker registration failed:', swError);
+          return null;
         }
       }
       
@@ -30,9 +36,26 @@ export const useNotifications = () => {
 
       if (permission === 'granted') {
         console.log('✅ Permission granted, getting FCM token...');
-        const token = await getToken(messaging, { vapidKey });
+        
+        if (!messaging) {
+          console.error('❌ Firebase messaging not initialized');
+          return null;
+        }
+        
+        if (!vapidKey) {
+          console.error('❌ VAPID key not configured');
+          return null;
+        }
+        
+        console.log('🔑 Using VAPID key:', vapidKey ? vapidKey.substring(0, 20) + '...' : 'undefined');
+        
+        const token = await getToken(messaging, { 
+          vapidKey,
+          serviceWorkerRegistration: await navigator.serviceWorker.ready
+        });
         setFcmToken(token);
         console.log('🎫 FCM Token:', token);
+        console.log('🎫 FCM Token length:', token?.length);
         
         // Subscribe to 'all' topic by sending token to backend
         try {
@@ -65,9 +88,11 @@ export const useNotifications = () => {
   useEffect(() => {
     if (messaging) {
       console.log('🎧 Setting up foreground message listener...', { messaging });
+      console.log('🎧 Messaging object:', messaging);
       
       const unsubscribe = onMessage(messaging, (payload) => {
         console.log('🔔 Foreground message received:', payload);
+        console.log('🔔 Payload structure:', JSON.stringify(payload, null, 2));
         console.log('🔔 Notification permission status:', Notification.permission);
         
         const notificationData = {
@@ -107,7 +132,10 @@ export const useNotifications = () => {
         }, 500);
       });
 
+      console.log('🎧 Message listener setup complete, unsubscribe function:', typeof unsubscribe);
       return unsubscribe;
+    } else {
+      console.error('❌ Cannot setup message listener - messaging is null/undefined');
     }
   }, []);
 

@@ -91,6 +91,7 @@ const DebugPanel = ({ fcmToken, permissionStatus }) => {
     // Check if Firebase messaging is available
     if (window.firebase?.messaging) {
       addDebugInfo('✅ Firebase SDK loaded', 'success');
+      addDebugInfo(`Firebase app: ${window.firebase.app?.name}`, 'info');
     } else {
       addDebugInfo('❌ Firebase SDK not loaded', 'error');
       addDebugInfo('Check browser console for Firebase config errors', 'warning');
@@ -99,8 +100,10 @@ const DebugPanel = ({ fcmToken, permissionStatus }) => {
     // Check FCM token
     if (fcmToken) {
       addDebugInfo(`✅ FCM Token: ${fcmToken.substring(0, 20)}...`, 'success');
+      addDebugInfo(`Token length: ${fcmToken.length}`, 'info');
     } else {
       addDebugInfo('❌ No FCM Token generated', 'error');
+      addDebugInfo('Try clicking "Enable Notifications" first', 'warning');
     }
 
     // Check permission
@@ -110,7 +113,10 @@ const DebugPanel = ({ fcmToken, permissionStatus }) => {
     const envVars = [
       'VITE_FIREBASE_API_KEY',
       'VITE_FIREBASE_PROJECT_ID',
-      'VITE_FIREBASE_VAPID_KEY'
+      'VITE_FIREBASE_VAPID_KEY',
+      'VITE_FIREBASE_AUTH_DOMAIN',
+      'VITE_FIREBASE_MESSAGING_SENDER_ID',
+      'VITE_FIREBASE_APP_ID'
     ];
     
     envVars.forEach(varName => {
@@ -121,14 +127,45 @@ const DebugPanel = ({ fcmToken, permissionStatus }) => {
     // Check service worker registration
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(registrations => {
-        const fcmSW = registrations.find(reg => reg.scope.includes('firebase-messaging-sw.js') || reg.active?.scriptURL.includes('firebase-messaging-sw.js'));
+        addDebugInfo(`Total service workers: ${registrations.length}`, 'info');
+        
+        registrations.forEach((reg, index) => {
+          addDebugInfo(`SW ${index + 1}: ${reg.scope}`, 'info');
+          addDebugInfo(`SW ${index + 1} script: ${reg.active?.scriptURL || 'inactive'}`, 'info');
+        });
+        
+        const fcmSW = registrations.find(reg => 
+          reg.scope.includes('firebase-messaging-sw.js') || 
+          reg.active?.scriptURL.includes('firebase-messaging-sw.js') ||
+          reg.active?.scriptURL.includes('/firebase-messaging-sw.js')
+        );
+        
         if (fcmSW) {
           addDebugInfo('✅ Firebase messaging service worker found', 'success');
+          addDebugInfo(`SW state: ${fcmSW.active?.state}`, 'info');
         } else {
           addDebugInfo('❌ Firebase messaging service worker not found', 'error');
           addDebugInfo('Service worker is required for background notifications', 'warning');
+          addDebugInfo('Check if /firebase-messaging-sw.js exists in public folder', 'warning');
         }
       });
+    }
+    
+    // Test if we can create a test message listener
+    if (window.firebase?.messaging) {
+      try {
+        addDebugInfo('Testing message listener setup...', 'info');
+        // This is just a test - we won't actually use this listener
+        const testUnsubscribe = window.firebase.messaging.onMessage?.(() => {});
+        if (testUnsubscribe) {
+          addDebugInfo('✅ Message listener can be created', 'success');
+          testUnsubscribe(); // Clean up
+        } else {
+          addDebugInfo('❌ Cannot create message listener', 'error');
+        }
+      } catch (error) {
+        addDebugInfo(`❌ Message listener error: ${error.message}`, 'error');
+      }
     }
   };
 

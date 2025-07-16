@@ -36,17 +36,24 @@ console.log('🔧 Firebase Config:', {
   appId: firebaseConfig.appId ? '✅ Set' : '❌ Missing'
 });
 
+console.log('🔑 VAPID Key:', vapidKey ? '✅ Set (' + vapidKey.substring(0, 20) + '...)' : '❌ Missing');
+
 let app, messaging;
 
 try {
   app = initializeApp(firebaseConfig);
+  console.log('✅ Firebase app initialized:', app);
+  
   messaging = getMessaging(app);
+  console.log('✅ Firebase messaging initialized:', messaging);
   console.log('✅ Firebase initialized successfully');
   
   // Make Firebase available globally for debugging
   window.firebase = { app, messaging };
 } catch (error) {
   console.error('❌ Firebase initialization failed:', error);
+  console.error('❌ Error details:', error.message);
+  console.error('❌ Error stack:', error.stack);
 }
 
 const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY;
