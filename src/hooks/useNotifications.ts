@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { messaging, vapidKey, getToken, onMessage } from '../firebase-config';
-import type { Messaging } from 'firebase/messaging';
+import type { Messaging, MessagePayload } from 'firebase/messaging';
 
 const BACKEND_URL = 'http://localhost:8000/api';
 
@@ -22,7 +22,18 @@ interface ToastNotification {
   body: string;
 }
 
-export const useNotifications = () => {
+interface UseNotificationsReturn {
+  fcmToken: string | null;
+  permissionStatus: NotificationPermission;
+  notifications: NotificationItem[];
+  toast: ToastNotification | null;
+  setToast: (toast: ToastNotification | null) => void;
+  requestPermission: () => Promise<string | null>;
+  fetchNotifications: () => Promise<void>;
+  sendNotification: (data: NotificationData) => Promise<boolean>;
+}
+
+export const useNotifications = (): UseNotificationsReturn => {
   const [fcmToken, setFcmToken] = useState<string | null>(null);
   const [permissionStatus, setPermissionStatus] = useState<NotificationPermission>('default');
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
@@ -109,7 +120,7 @@ export const useNotifications = () => {
       console.log('🎧 Setting up foreground message listener...', { messaging });
       console.log('🎧 Messaging object:', messaging);
       
-      const unsubscribe = onMessage(messaging as Messaging, (payload: any) => {
+      const unsubscribe = onMessage(messaging as Messaging, (payload: MessagePayload) => {
         console.log('🔔 Foreground message received:', payload);
         console.log('🔔 Payload structure:', JSON.stringify(payload, null, 2));
         console.log('🔔 Notification permission status:', Notification.permission);

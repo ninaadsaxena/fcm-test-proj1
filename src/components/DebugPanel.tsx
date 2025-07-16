@@ -12,6 +12,11 @@ interface DebugPanelProps {
   permissionStatus: NotificationPermission;
 }
 
+interface FirebaseGlobal {
+  app?: { name?: string };
+  messaging?: unknown;
+}
+
 const DebugPanel: React.FC<DebugPanelProps> = ({ fcmToken, permissionStatus }) => {
   const [debugInfo, setDebugInfo] = useState<DebugInfo[]>([]);
   const [isVisible, setIsVisible] = useState(false);
