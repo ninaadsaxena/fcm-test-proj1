@@ -42,6 +42,7 @@ const Toast: React.FC<ToastProps> = ({ notification, onClose }) => {
             onClose();
           }}
           className="text-gray-400 hover:text-gray-600 focus:outline-none ml-2"
+          aria-label="Close notification"
         >
           <X className="w-4 h-4" />
         </button>

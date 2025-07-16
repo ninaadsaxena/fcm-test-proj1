@@ -109,7 +109,7 @@ export const useNotifications = () => {
       console.log('🎧 Setting up foreground message listener...', { messaging });
       console.log('🎧 Messaging object:', messaging);
       
-      const unsubscribe = onMessage(messaging as Messaging, (payload) => {
+      const unsubscribe = onMessage(messaging as Messaging, (payload: any) => {
         console.log('🔔 Foreground message received:', payload);
         console.log('🔔 Payload structure:', JSON.stringify(payload, null, 2));
         console.log('🔔 Notification permission status:', Notification.permission);
@@ -130,7 +130,7 @@ export const useNotifications = () => {
           console.log('🌐 Creating browser notification...', notificationData);
           
           try {
-            const browserNotification = new Notification(notificationData.title, {
+            new Notification(notificationData.title, {
               body: notificationData.body,
               icon: '/vite.svg',
               tag: 'fcm-foreground',

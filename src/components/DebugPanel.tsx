@@ -216,6 +216,7 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ fcmToken, permissionStatus }) =
         <button
           onClick={() => setIsVisible(false)}
           className="text-gray-400 hover:text-gray-600"
+          aria-label="Close debug panel"
         >
           ×
         </button>
