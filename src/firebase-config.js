@@ -36,8 +36,6 @@ console.log('🔧 Firebase Config:', {
   appId: firebaseConfig.appId ? '✅ Set' : '❌ Missing'
 });
 
-console.log('🔑 VAPID Key:', vapidKey ? '✅ Set (' + vapidKey.substring(0, 20) + '...)' : '❌ Missing');
-
 let app, messaging;
 
 try {
@@ -55,6 +53,8 @@ try {
   console.error('❌ Error details:', error.message);
   console.error('❌ Error stack:', error.stack);
 }
+
+console.log('🔑 VAPID Key:', vapidKey ? '✅ Set (' + vapidKey.substring(0, 20) + '...)' : '❌ Missing');
 
 const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY;
 
