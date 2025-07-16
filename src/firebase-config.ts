@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
+import type { Messaging } from 'firebase/messaging';
 
 // Check if all required environment variables are present
 const requiredEnvVars = [
@@ -27,6 +28,8 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
+const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY;
+
 console.log('🔧 Firebase Config:', {
   apiKey: firebaseConfig.apiKey ? '✅ Set' : '❌ Missing',
   authDomain: firebaseConfig.authDomain ? '✅ Set' : '❌ Missing',
@@ -36,7 +39,13 @@ console.log('🔧 Firebase Config:', {
   appId: firebaseConfig.appId ? '✅ Set' : '❌ Missing'
 });
 
-let app, messaging;
+console.log('🔑 VAPID Key:', vapidKey ? '✅ Set (' + vapidKey.substring(0, 20) + '...)' : '❌ Missing');
+
+if (!vapidKey) {
+  console.error('❌ VAPID key is missing. Please set VITE_FIREBASE_VAPID_KEY in your .env file');
+}
+
+let app: any, messaging: Messaging | null = null;
 
 try {
   app = initializeApp(firebaseConfig);
@@ -47,19 +56,11 @@ try {
   console.log('✅ Firebase initialized successfully');
   
   // Make Firebase available globally for debugging
-  window.firebase = { app, messaging };
+  (window as any).firebase = { app, messaging };
 } catch (error) {
   console.error('❌ Firebase initialization failed:', error);
-  console.error('❌ Error details:', error.message);
-  console.error('❌ Error stack:', error.stack);
-}
-
-console.log('🔑 VAPID Key:', vapidKey ? '✅ Set (' + vapidKey.substring(0, 20) + '...)' : '❌ Missing');
-
-const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY;
-
-if (!vapidKey) {
-  console.error('❌ VAPID key is missing. Please set VITE_FIREBASE_VAPID_KEY in your .env file');
+  console.error('❌ Error details:', (error as Error).message);
+  console.error('❌ Error stack:', (error as Error).stack);
 }
 
 export { messaging, vapidKey, getToken, onMessage };

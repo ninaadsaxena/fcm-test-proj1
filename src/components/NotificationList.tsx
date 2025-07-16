@@ -1,8 +1,19 @@
 import React from 'react';
 import { Bell, Clock } from 'lucide-react';
 
-const NotificationList = ({ notifications }) => {
-  const formatTimestamp = (timestamp) => {
+interface NotificationItem {
+  id: number;
+  title: string;
+  body: string;
+  timestamp: string;
+}
+
+interface NotificationListProps {
+  notifications: NotificationItem[];
+}
+
+const NotificationList: React.FC<NotificationListProps> = ({ notifications }) => {
+  const formatTimestamp = (timestamp: string): string => {
     return new Date(timestamp).toLocaleString();
   };
 

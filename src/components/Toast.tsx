@@ -1,7 +1,17 @@
 import React, { useEffect } from 'react';
 import { X, Bell } from 'lucide-react';
 
-const Toast = ({ notification, onClose }) => {
+interface ToastNotification {
+  title: string;
+  body: string;
+}
+
+interface ToastProps {
+  notification: ToastNotification | null;
+  onClose: () => void;
+}
+
+const Toast: React.FC<ToastProps> = ({ notification, onClose }) => {
   useEffect(() => {
     if (notification) {
       console.log('🍞 Toast notification displayed:', notification);

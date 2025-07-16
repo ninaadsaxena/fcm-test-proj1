@@ -1,13 +1,23 @@
 import React, { useState } from 'react';
 import { Send } from 'lucide-react';
 
-const NotificationForm = ({ onSendNotification }) => {
+interface NotificationData {
+  title: string;
+  body: string;
+  topic?: string;
+}
+
+interface NotificationFormProps {
+  onSendNotification: (data: NotificationData) => Promise<boolean>;
+}
+
+const NotificationForm: React.FC<NotificationFormProps> = ({ onSendNotification }) => {
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [topic, setTopic] = useState('all');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !body.trim()) return;
 
