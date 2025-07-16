@@ -37,6 +37,31 @@ const DebugPanel = ({ fcmToken, permissionStatus }) => {
     }
   };
 
+  const testBrowserNotification = () => {
+    addDebugInfo('Testing browser notification...', 'info');
+    
+    if (Notification.permission === 'granted') {
+      try {
+        const notification = new Notification('Test Notification', {
+          body: 'This is a test browser notification',
+          icon: '/vite.svg',
+          tag: 'test-notification'
+        });
+        
+        addDebugInfo('✅ Browser notification created', 'success');
+        
+        setTimeout(() => {
+          notification.close();
+        }, 3000);
+        
+      } catch (error) {
+        addDebugInfo(`❌ Browser notification failed: ${error.message}`, 'error');
+      }
+    } else {
+      addDebugInfo(`❌ Permission not granted: ${Notification.permission}`, 'error');
+    }
+  };
+
   const testServiceWorker = async () => {
     addDebugInfo('Checking service worker...', 'info');
     
@@ -152,6 +177,12 @@ const DebugPanel = ({ fcmToken, permissionStatus }) => {
           className="w-full bg-purple-600 text-white px-3 py-2 rounded text-sm hover:bg-purple-700"
         >
           Test API Call
+        </button>
+        <button
+          onClick={testBrowserNotification}
+          className="w-full bg-orange-600 text-white px-3 py-2 rounded text-sm hover:bg-orange-700"
+        >
+          Test Browser Notification
         </button>
         <button
           onClick={clearDebug}

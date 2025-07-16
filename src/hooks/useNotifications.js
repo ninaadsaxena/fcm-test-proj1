@@ -35,10 +35,11 @@ export const useNotifications = () => {
   // Setup foreground message listener
   useEffect(() => {
     if (messaging) {
-      console.log('🎧 Setting up foreground message listener...');
+      console.log('🎧 Setting up foreground message listener...', { messaging });
       
       const unsubscribe = onMessage(messaging, (payload) => {
         console.log('🔔 Foreground message received:', payload);
+        console.log('🔔 Notification permission status:', Notification.permission);
         
         const notificationData = {
           title: payload.notification?.title || payload.data?.title || 'New Notification',
@@ -49,31 +50,33 @@ export const useNotifications = () => {
 
         // Show toast notification in the app
         setToast(notificationData);
-        console.log('🍞 Toast notification set');
+        console.log('🍞 Toast notification set:', notificationData);
 
         // Also show browser notification for immediate visibility
         if (Notification.permission === 'granted') {
-          console.log('🌐 Creating browser notification...');
+          console.log('🌐 Creating browser notification...', notificationData);
           
-          const browserNotification = new Notification(notificationData.title, {
-            body: notificationData.body,
-            icon: '/vite.svg', // Using existing Vite icon
-            tag: 'fcm-foreground',
-            requireInteraction: false
-          });
+          try {
+            const browserNotification = new Notification(notificationData.title, {
+              body: notificationData.body,
+              icon: '/vite.svg',
+              tag: 'fcm-foreground',
+              requireInteraction: false
+            });
+            
+            console.log('✅ Browser notification created successfully');
+          } catch (error) {
+            console.error('❌ Failed to create browser notification:', error);
+          }
+        } else {
+          console.log('❌ Cannot create browser notification - permission not granted:', Notification.permission);
+        }
 
           // Auto close after 5 seconds
           setTimeout(() => {
             browserNotification.close();
           }, 5000);
 
-          browserNotification.onclick = () => {
-            console.log('🖱️ Browser notification clicked');
-            window.focus();
-            browserNotification.close();
-          };
-        }
-        
         // Refresh notifications list
         setTimeout(() => {
           fetchNotifications();
