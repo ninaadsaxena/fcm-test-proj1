@@ -64,10 +64,11 @@ const DebugPanel = ({ fcmToken, permissionStatus }) => {
     addDebugInfo('Testing Firebase Messaging...', 'info');
     
     // Check if Firebase messaging is available
-    if (window.firebase) {
+    if (window.firebase && window.firebase.messaging) {
       addDebugInfo('✅ Firebase SDK loaded', 'success');
     } else {
       addDebugInfo('❌ Firebase SDK not loaded', 'error');
+      addDebugInfo('Check browser console for Firebase config errors', 'warning');
     }
 
     // Check FCM token
@@ -79,6 +80,18 @@ const DebugPanel = ({ fcmToken, permissionStatus }) => {
 
     // Check permission
     addDebugInfo(`Permission: ${permissionStatus}`, permissionStatus === 'granted' ? 'success' : 'error');
+    
+    // Check environment variables
+    const envVars = [
+      'VITE_FIREBASE_API_KEY',
+      'VITE_FIREBASE_PROJECT_ID',
+      'VITE_FIREBASE_VAPID_KEY'
+    ];
+    
+    envVars.forEach(varName => {
+      const value = import.meta.env[varName];
+      addDebugInfo(`${varName}: ${value ? '✅ Set' : '❌ Missing'}`, value ? 'success' : 'error');
+    });
   };
 
   const clearDebug = () => {
