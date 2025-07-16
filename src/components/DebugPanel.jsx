@@ -89,7 +89,7 @@ const DebugPanel = ({ fcmToken, permissionStatus }) => {
     addDebugInfo('Testing Firebase Messaging...', 'info');
     
     // Check if Firebase messaging is available
-    if (window.firebase && window.firebase.messaging) {
+    if (window.firebase?.messaging) {
       addDebugInfo('✅ Firebase SDK loaded', 'success');
     } else {
       addDebugInfo('❌ Firebase SDK not loaded', 'error');
@@ -117,6 +117,19 @@ const DebugPanel = ({ fcmToken, permissionStatus }) => {
       const value = import.meta.env[varName];
       addDebugInfo(`${varName}: ${value ? '✅ Set' : '❌ Missing'}`, value ? 'success' : 'error');
     });
+    
+    // Check service worker registration
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(registrations => {
+        const fcmSW = registrations.find(reg => reg.scope.includes('firebase-messaging-sw.js') || reg.active?.scriptURL.includes('firebase-messaging-sw.js'));
+        if (fcmSW) {
+          addDebugInfo('✅ Firebase messaging service worker found', 'success');
+        } else {
+          addDebugInfo('❌ Firebase messaging service worker not found', 'error');
+          addDebugInfo('Service worker is required for background notifications', 'warning');
+        }
+      });
+    }
   };
 
   const clearDebug = () => {

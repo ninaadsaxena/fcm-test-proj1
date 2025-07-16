@@ -13,6 +13,17 @@ export const useNotifications = () => {
   const requestPermission = async () => {
     try {
       console.log('🔔 Requesting notification permission...');
+      
+      // Register service worker first
+      if ('serviceWorker' in navigator) {
+        try {
+          const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+          console.log('✅ Service Worker registered:', registration);
+        } catch (swError) {
+          console.error('❌ Service Worker registration failed:', swError);
+        }
+      }
+      
       const permission = await Notification.requestPermission();
       setPermissionStatus(permission);
       console.log('📋 Notification permission:', permission);
@@ -22,6 +33,24 @@ export const useNotifications = () => {
         const token = await getToken(messaging, { vapidKey });
         setFcmToken(token);
         console.log('🎫 FCM Token:', token);
+        
+        // Subscribe to 'all' topic by sending token to backend
+        try {
+          await fetch(`${BACKEND_URL}/subscribe-to-topic/`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              token: token,
+              topic: 'all'
+            }),
+          });
+          console.log('✅ Subscribed to "all" topic');
+        } catch (error) {
+          console.log('⚠️ Could not subscribe to topic (backend endpoint may not exist):', error.message);
+        }
+        
         return token;
       } else {
         console.log('❌ Permission denied or dismissed');
@@ -71,11 +100,6 @@ export const useNotifications = () => {
         } else {
           console.log('❌ Cannot create browser notification - permission not granted:', Notification.permission);
         }
-
-          // Auto close after 5 seconds
-          setTimeout(() => {
-            browserNotification.close();
-          }, 5000);
 
         // Refresh notifications list
         setTimeout(() => {
