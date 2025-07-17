@@ -179,26 +179,6 @@ export const useNotifications = (): UseNotificationsReturn => {
       }
     }
   }, [permissionStatus]); // Add permissionStatus as dependency
-            
-            console.log('✅ Foreground browser notification created');
-          } catch (error) {
-            console.error('❌ Failed to create browser notification:', error);
-          }
-        } else {
-          console.error('❌ Cannot create browser notification - permission:', Notification.permission);
-        }
-
-        // Refresh notifications list
-        setTimeout(() => {
-          fetchNotifications();
-        }, 500);
-      });
-
-      return unsubscribe;
-    } else {
-      console.error('❌ Cannot setup message listener - messaging is null/undefined');
-    }
-  }, []);
 
   // Check initial permission status
   useEffect(() => {
