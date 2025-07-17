@@ -116,38 +116,69 @@ export const useNotifications = (): UseNotificationsReturn => {
 
   // Setup foreground message listener
   useEffect(() => {
-    if (messaging) {
+    if (messaging && permissionStatus === 'granted') {
       console.log('🎧 Setting up foreground message listener...', { messaging });
       
-      const unsubscribe = onMessage(messaging as Messaging, (payload: MessagePayload) => {
-        console.log('🔔 Foreground message received:', payload);
-        
-        const notificationData: ToastNotification = {
-          title: payload.notification?.title || payload.data?.title || 'New Notification',
-          body: payload.notification?.body || payload.data?.body || 'You have a new message',
-        };
-
-        // Show toast notification in the app
-        setToast(notificationData);
-
-        // CRITICAL: Show browser notification for foreground messages
-        if (Notification.permission === 'granted') {
-          console.log('🌐 Creating browser notification for foreground message');
+      try {
+        const unsubscribe = onMessage(messaging as Messaging, (payload: MessagePayload) => {
+          console.log('🔔 Foreground message received:', payload);
           
-          try {
-            const notification = new Notification(notificationData.title, {
-              body: notificationData.body,
-              icon: '/icon-192x192.png',
-              badge: '/badge-72x72.png',
-              tag: 'fcm-app-notification',
-              requireInteraction: false,
-              silent: false
-            });
+          const notificationData: ToastNotification = {
+            title: payload.notification?.title || payload.data?.title || 'New Notification',
+            body: payload.notification?.body || payload.data?.body || 'You have a new message',
+          };
+
+          // Show toast notification in the app
+          setToast(notificationData);
+
+          // CRITICAL: Show browser notification for foreground messages
+          if (Notification.permission === 'granted') {
+            console.log('🌐 Creating browser notification for foreground message');
             
-            // Auto-close after 5 seconds
-            setTimeout(() => {
-              notification.close();
-            }, 5000);
+            try {
+              const notification = new Notification(notificationData.title, {
+                body: notificationData.body,
+                tag: 'fcm-app-notification',
+                requireInteraction: false,
+                silent: false
+              });
+              
+              // Auto-close after 5 seconds
+              setTimeout(() => {
+                notification.close();
+              }, 5000);
+              
+              console.log('✅ Foreground browser notification created');
+            } catch (error) {
+              console.error('❌ Failed to create browser notification:', error);
+            }
+          } else {
+            console.error('❌ Cannot create browser notification - permission:', Notification.permission);
+          }
+
+          // Refresh notifications list
+          setTimeout(() => {
+            fetchNotifications();
+          }, 500);
+        });
+
+        console.log('✅ Message listener setup successful');
+        return unsubscribe;
+      } catch (error) {
+        console.error('❌ Failed to setup message listener:', error);
+        
+        // Return a no-op function to prevent errors
+        return () => {};
+      }
+    } else {
+      if (!messaging) {
+        console.error('❌ Cannot setup message listener - messaging is null/undefined');
+      }
+      if (permissionStatus !== 'granted') {
+        console.log('⚠️ Cannot setup message listener - permission not granted:', permissionStatus);
+      }
+    }
+  }, [permissionStatus]); // Add permissionStatus as dependency
             
             console.log('✅ Foreground browser notification created');
           } catch (error) {

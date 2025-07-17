@@ -174,17 +174,31 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ fcmToken, permissionStatus }) =
     if (firebaseGlobal?.messaging) {
       try {
         addDebugInfo('Testing message listener setup...', 'info');
-        // This is just a test - we won't actually use this listener
-        const testUnsubscribe = firebaseGlobal.messaging.onMessage?.(() => {});
-        if (testUnsubscribe) {
-          addDebugInfo('✅ Message listener can be created', 'success');
-          testUnsubscribe(); // Clean up
+        
+        // Check if onMessage is available
+        if (typeof firebaseGlobal.messaging.onMessage === 'function') {
+          addDebugInfo('✅ onMessage function is available', 'success');
+          
+          // Test creating a listener (but don't actually use it)
+          try {
+            const testUnsubscribe = firebaseGlobal.messaging.onMessage(() => {});
+            if (typeof testUnsubscribe === 'function') {
+              addDebugInfo('✅ Message listener can be created', 'success');
+              testUnsubscribe(); // Clean up immediately
+            } else {
+              addDebugInfo('❌ onMessage did not return unsubscribe function', 'error');
+            }
+          } catch (listenerError) {
+            addDebugInfo(`❌ Cannot create listener: ${(listenerError as Error).message}`, 'error');
+          }
         } else {
-          addDebugInfo('❌ Cannot create message listener', 'error');
+          addDebugInfo('❌ onMessage function not available', 'error');
         }
       } catch (error) {
         addDebugInfo(`❌ Message listener error: ${(error as Error).message}`, 'error');
       }
+    } else {
+      addDebugInfo('❌ Firebase messaging not available for listener test', 'error');
     }
   };
 

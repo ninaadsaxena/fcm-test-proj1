@@ -61,12 +61,19 @@ try {
   app = initializeApp(firebaseConfig);
   console.log('✅ Firebase app initialized:', app);
   
-  messaging = getMessaging(app);
-  console.log('✅ Firebase messaging initialized:', messaging);
-  console.log('✅ Firebase initialized successfully');
+  // Only initialize messaging if we're in a browser environment
+  if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+    messaging = getMessaging(app);
+    console.log('✅ Firebase messaging initialized:', messaging);
+    console.log('✅ Firebase initialized successfully');
+  } else {
+    console.log('⚠️ Service Worker not supported, messaging not initialized');
+  }
   
   // Make Firebase available globally for debugging
-  (window as typeof window & { firebase?: { app: FirebaseApp; messaging: Messaging } }).firebase = { app, messaging };
+  if (typeof window !== 'undefined') {
+    (window as typeof window & { firebase?: { app: FirebaseApp; messaging: Messaging | null } }).firebase = { app, messaging };
+  }
 } catch (error) {
   console.error('❌ Firebase initialization failed:', error);
   if (error instanceof Error) {
