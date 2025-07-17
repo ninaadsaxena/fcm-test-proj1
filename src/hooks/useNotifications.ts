@@ -118,42 +118,43 @@ export const useNotifications = (): UseNotificationsReturn => {
   useEffect(() => {
     if (messaging) {
       console.log('🎧 Setting up foreground message listener...', { messaging });
-      console.log('🎧 Messaging object:', messaging);
       
       const unsubscribe = onMessage(messaging as Messaging, (payload: MessagePayload) => {
         console.log('🔔 Foreground message received:', payload);
-        console.log('🔔 Payload structure:', JSON.stringify(payload, null, 2));
-        console.log('🔔 Notification permission status:', Notification.permission);
         
         const notificationData: ToastNotification = {
           title: payload.notification?.title || payload.data?.title || 'New Notification',
           body: payload.notification?.body || payload.data?.body || 'You have a new message',
         };
 
-        console.log('📱 Processed notification data:', notificationData);
-
         // Show toast notification in the app
         setToast(notificationData);
-        console.log('🍞 Toast notification set:', notificationData);
 
-        // Also show browser notification for immediate visibility
+        // CRITICAL: Show browser notification for foreground messages
         if (Notification.permission === 'granted') {
-          console.log('🌐 Creating browser notification...', notificationData);
+          console.log('🌐 Creating browser notification for foreground message');
           
           try {
-            new Notification(notificationData.title, {
+            const notification = new Notification(notificationData.title, {
               body: notificationData.body,
-              icon: '/vite.svg',
-              tag: 'fcm-foreground',
-              requireInteraction: false
+              icon: '/icon-192x192.png',
+              badge: '/badge-72x72.png',
+              tag: 'fcm-app-notification',
+              requireInteraction: false,
+              silent: false
             });
             
-            console.log('✅ Browser notification created successfully');
+            // Auto-close after 5 seconds
+            setTimeout(() => {
+              notification.close();
+            }, 5000);
+            
+            console.log('✅ Foreground browser notification created');
           } catch (error) {
             console.error('❌ Failed to create browser notification:', error);
           }
         } else {
-          console.log('❌ Cannot create browser notification - permission not granted:', Notification.permission);
+          console.error('❌ Cannot create browser notification - permission:', Notification.permission);
         }
 
         // Refresh notifications list
@@ -162,7 +163,6 @@ export const useNotifications = (): UseNotificationsReturn => {
         }, 500);
       });
 
-      console.log('🎧 Message listener setup complete, unsubscribe function:', typeof unsubscribe);
       return unsubscribe;
     } else {
       console.error('❌ Cannot setup message listener - messaging is null/undefined');

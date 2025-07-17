@@ -60,15 +60,17 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ fcmToken, permissionStatus }) =
       try {
         const notification = new Notification('Test Notification', {
           body: 'This is a test browser notification',
-          icon: '/vite.svg',
-          tag: 'test-notification'
+          icon: '/icon-192x192.png',
+          badge: '/badge-72x72.png',
+          tag: 'debug-test-notification',
+          requireInteraction: false
         });
         
         addDebugInfo('✅ Browser notification created', 'success');
         
         setTimeout(() => {
           notification.close();
-        }, 3000);
+        }, 5000);
         
       } catch (error) {
         addDebugInfo(`❌ Browser notification failed: ${(error as Error).message}`, 'error');
