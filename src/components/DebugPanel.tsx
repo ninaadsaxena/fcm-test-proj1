@@ -163,7 +163,7 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ fcmToken, permissionStatus }) =
         } else {
           addDebugInfo('❌ Firebase messaging service worker not found', 'error');
           addDebugInfo('Service worker is required for background notifications', 'warning');
-          addDebugInfo('Check if /firebase-messaging-sw.js exists in public folder', 'warning');
+          addDebugInfo('Update /firebase-messaging-sw.js with your Firebase config', 'warning');
         }
       });
     }
@@ -182,6 +182,33 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ fcmToken, permissionStatus }) =
         }
       } catch (error) {
         addDebugInfo(`❌ Message listener error: ${(error as Error).message}`, 'error');
+      }
+    }
+  };
+
+  const testServiceWorkerReload = async () => {
+    addDebugInfo('Reloading service worker...', 'info');
+    
+    if ('serviceWorker' in navigator) {
+      try {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        
+        // Unregister existing service workers
+        for (const registration of registrations) {
+          await registration.unregister();
+          addDebugInfo(`Unregistered: ${registration.scope}`, 'info');
+        }
+        
+        // Re-register the service worker
+        const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+        addDebugInfo('✅ Service worker re-registered', 'success');
+        
+        // Wait for it to be ready
+        await navigator.serviceWorker.ready;
+        addDebugInfo('✅ Service worker is ready', 'success');
+        
+      } catch (error) {
+        addDebugInfo(`❌ Service worker reload failed: ${(error as Error).message}`, 'error');
       }
     }
   };
@@ -251,6 +278,12 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ fcmToken, permissionStatus }) =
           className="w-full bg-orange-600 text-white px-3 py-2 rounded text-sm hover:bg-orange-700"
         >
           Test Browser Notification
+        </button>
+        <button
+          onClick={testServiceWorkerReload}
+          className="w-full bg-indigo-600 text-white px-3 py-2 rounded text-sm hover:bg-indigo-700"
+        >
+          Reload Service Worker
         </button>
         <button
           onClick={clearDebug}
