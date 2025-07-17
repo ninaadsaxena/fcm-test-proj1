@@ -144,6 +144,18 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ fcmToken, permissionStatus }) =
     
     if (firebaseGlobal?.messaging) {
       addDebugInfo('✅ Firebase messaging initialized', 'success');
+      
+      // Test onMessage function availability
+      try {
+        const { onMessage } = await import('../firebase-config');
+        if (typeof onMessage === 'function') {
+          addDebugInfo('✅ onMessage function available', 'success');
+        } else {
+          addDebugInfo('❌ onMessage function not available', 'error');
+        }
+      } catch (importError) {
+        addDebugInfo(`❌ Failed to import onMessage: ${importError}`, 'error');
+      }
     } else {
       addDebugInfo('❌ Firebase messaging not initialized', 'error');
       addDebugInfo('Check browser console for initialization errors', 'warning');

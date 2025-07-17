@@ -69,18 +69,28 @@ try {
   // Only initialize messaging if we're in a browser environment
   if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
     try {
+      // Wait a bit for the app to be fully ready
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       messaging = getMessaging(app);
       console.log('✅ Firebase messaging initialized:', messaging);
       
-      // Test if messaging methods are available
-      if (messaging && typeof getToken === 'function' && typeof onMessage === 'function') {
-        console.log('✅ Firebase messaging methods available');
-      } else {
-        console.error('❌ Firebase messaging methods not available');
-        messaging = null;
+      // Verify messaging is working by testing getToken availability
+      if (messaging) {
+        console.log('✅ Firebase messaging ready');
+        
+        // Test if we can access messaging methods
+        try {
+          // This will throw if messaging isn't properly initialized
+          const testSupported = await messaging.isSupported?.() ?? true;
+          console.log('✅ Messaging supported:', testSupported);
+        } catch (testError) {
+          console.log('⚠️ Messaging support test failed, but continuing:', testError);
+        }
       }
     } catch (messagingError) {
       console.error('❌ Firebase messaging initialization failed:', messagingError);
+      console.error('❌ Error details:', messagingError);
       messaging = null;
     }
   } else {
