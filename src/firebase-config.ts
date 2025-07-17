@@ -58,28 +58,46 @@ let app: FirebaseApp | null = null;
 let messaging: Messaging | null = null;
 
 try {
+  // Validate that we have the minimum required config
+  if (!firebaseConfig.apiKey || !firebaseConfig.projectId || !firebaseConfig.messagingSenderId) {
+    throw new Error('Missing required Firebase configuration. Please check your .env file.');
+  }
+
   app = initializeApp(firebaseConfig);
   console.log('✅ Firebase app initialized:', app);
   
   // Only initialize messaging if we're in a browser environment
   if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-    messaging = getMessaging(app);
-    console.log('✅ Firebase messaging initialized:', messaging);
-    console.log('✅ Firebase initialized successfully');
+    try {
+      messaging = getMessaging(app);
+      console.log('✅ Firebase messaging initialized:', messaging);
+      
+      // Test if messaging methods are available
+      if (messaging && typeof getToken === 'function' && typeof onMessage === 'function') {
+        console.log('✅ Firebase messaging methods available');
+      } else {
+        console.error('❌ Firebase messaging methods not available');
+        messaging = null;
+      }
+    } catch (messagingError) {
+      console.error('❌ Firebase messaging initialization failed:', messagingError);
+      messaging = null;
+    }
   } else {
     console.log('⚠️ Service Worker not supported, messaging not initialized');
-  }
-  
-  // Make Firebase available globally for debugging
-  if (typeof window !== 'undefined') {
-    (window as typeof window & { firebase?: { app: FirebaseApp; messaging: Messaging | null } }).firebase = { app, messaging };
   }
 } catch (error) {
   console.error('❌ Firebase initialization failed:', error);
   if (error instanceof Error) {
     console.error('❌ Error details:', error.message);
-    console.error('❌ Error stack:', error.stack);
   }
+  app = null;
+  messaging = null;
+}
+
+// Make Firebase available globally for debugging
+if (typeof window !== 'undefined') {
+  (window as typeof window & { firebase?: { app: FirebaseApp | null; messaging: Messaging | null } }).firebase = { app, messaging };
 }
 
 export { messaging, vapidKey, getToken, onMessage };

@@ -106,14 +106,48 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ fcmToken, permissionStatus }) =
   const testFirebaseMessaging = () => {
     addDebugInfo('Testing Firebase Messaging...', 'info');
     
+    // Check environment variables first
+    const envVars = [
+      'VITE_FIREBASE_API_KEY',
+      'VITE_FIREBASE_PROJECT_ID',
+      'VITE_FIREBASE_VAPID_KEY',
+      'VITE_FIREBASE_AUTH_DOMAIN',
+      'VITE_FIREBASE_MESSAGING_SENDER_ID',
+      'VITE_FIREBASE_APP_ID'
+    ];
+    
+    let missingEnvVars = 0;
+    envVars.forEach(varName => {
+      const value = import.meta.env[varName];
+      if (!value) {
+        addDebugInfo(`${varName}: ❌ Missing`, 'error');
+        missingEnvVars++;
+      } else {
+        addDebugInfo(`${varName}: ✅ Set`, 'success');
+      }
+    });
+    
+    if (missingEnvVars > 0) {
+      addDebugInfo(`❌ ${missingEnvVars} environment variables missing`, 'error');
+      addDebugInfo('Create .env file with your Firebase config', 'warning');
+      return;
+    }
+    
     // Check if Firebase messaging is available
     const firebaseGlobal = (window as any).firebase;
-    if (firebaseGlobal?.messaging) {
-      addDebugInfo('✅ Firebase SDK loaded', 'success');
-      addDebugInfo(`Firebase app: ${firebaseGlobal.app?.name || 'unknown'}`, 'info');
+    if (firebaseGlobal?.app) {
+      addDebugInfo('✅ Firebase app initialized', 'success');
     } else {
-      addDebugInfo('❌ Firebase SDK not loaded', 'error');
-      addDebugInfo('Check browser console for Firebase config errors', 'warning');
+      addDebugInfo('❌ Firebase app not initialized', 'error');
+      return;
+    }
+    
+    if (firebaseGlobal?.messaging) {
+      addDebugInfo('✅ Firebase messaging initialized', 'success');
+    } else {
+      addDebugInfo('❌ Firebase messaging not initialized', 'error');
+      addDebugInfo('Check browser console for initialization errors', 'warning');
+      return;
     }
 
     // Check FCM token
@@ -127,79 +161,6 @@ const DebugPanel: React.FC<DebugPanelProps> = ({ fcmToken, permissionStatus }) =
 
     // Check permission
     addDebugInfo(`Permission: ${permissionStatus}`, permissionStatus === 'granted' ? 'success' : 'error');
-    
-    // Check environment variables
-    const envVars = [
-      'VITE_FIREBASE_API_KEY',
-      'VITE_FIREBASE_PROJECT_ID',
-      'VITE_FIREBASE_VAPID_KEY',
-      'VITE_FIREBASE_AUTH_DOMAIN',
-      'VITE_FIREBASE_MESSAGING_SENDER_ID',
-      'VITE_FIREBASE_APP_ID'
-    ];
-    
-    envVars.forEach(varName => {
-      const value = import.meta.env[varName];
-      addDebugInfo(`${varName}: ${value ? '✅ Set' : '❌ Missing'}`, value ? 'success' : 'error');
-    });
-    
-    // Check service worker registration
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(registrations => {
-        addDebugInfo(`Total service workers: ${registrations.length}`, 'info');
-        
-        registrations.forEach((reg, index) => {
-          addDebugInfo(`SW ${index + 1}: ${reg.scope}`, 'info');
-          addDebugInfo(`SW ${index + 1} script: ${reg.active?.scriptURL || 'inactive'}`, 'info');
-        });
-        
-        const fcmSW = registrations.find(reg => 
-          reg.scope.includes('firebase-messaging-sw.js') || 
-          reg.active?.scriptURL.includes('firebase-messaging-sw.js') ||
-          reg.active?.scriptURL.includes('/firebase-messaging-sw.js')
-        );
-        
-        if (fcmSW) {
-          addDebugInfo('✅ Firebase messaging service worker found', 'success');
-          addDebugInfo(`SW state: ${fcmSW.active?.state || 'unknown'}`, 'info');
-        } else {
-          addDebugInfo('❌ Firebase messaging service worker not found', 'error');
-          addDebugInfo('Service worker is required for background notifications', 'warning');
-          addDebugInfo('Update /firebase-messaging-sw.js with your Firebase config', 'warning');
-        }
-      });
-    }
-    
-    // Test if we can create a test message listener
-    if (firebaseGlobal?.messaging) {
-      try {
-        addDebugInfo('Testing message listener setup...', 'info');
-        
-        // Check if onMessage is available
-        if (typeof firebaseGlobal.messaging.onMessage === 'function') {
-          addDebugInfo('✅ onMessage function is available', 'success');
-          
-          // Test creating a listener (but don't actually use it)
-          try {
-            const testUnsubscribe = firebaseGlobal.messaging.onMessage(() => {});
-            if (typeof testUnsubscribe === 'function') {
-              addDebugInfo('✅ Message listener can be created', 'success');
-              testUnsubscribe(); // Clean up immediately
-            } else {
-              addDebugInfo('❌ onMessage did not return unsubscribe function', 'error');
-            }
-          } catch (listenerError) {
-            addDebugInfo(`❌ Cannot create listener: ${(listenerError as Error).message}`, 'error');
-          }
-        } else {
-          addDebugInfo('❌ onMessage function not available', 'error');
-        }
-      } catch (error) {
-        addDebugInfo(`❌ Message listener error: ${(error as Error).message}`, 'error');
-      }
-    } else {
-      addDebugInfo('❌ Firebase messaging not available for listener test', 'error');
-    }
   };
 
   const testServiceWorkerReload = async () => {

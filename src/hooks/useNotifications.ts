@@ -116,7 +116,7 @@ export const useNotifications = (): UseNotificationsReturn => {
 
   // Setup foreground message listener
   useEffect(() => {
-    if (messaging && permissionStatus === 'granted') {
+    if (messaging && permissionStatus === 'granted' && typeof onMessage === 'function') {
       console.log('🎧 Setting up foreground message listener...', { messaging });
       
       try {
@@ -166,18 +166,21 @@ export const useNotifications = (): UseNotificationsReturn => {
         return unsubscribe;
       } catch (error) {
         console.error('❌ Failed to setup message listener:', error);
-        
-        // Return a no-op function to prevent errors
-        return () => {};
       }
     } else {
       if (!messaging) {
         console.error('❌ Cannot setup message listener - messaging is null/undefined');
       }
+      if (typeof onMessage !== 'function') {
+        console.error('❌ onMessage function is not available');
+      }
       if (permissionStatus !== 'granted') {
         console.log('⚠️ Cannot setup message listener - permission not granted:', permissionStatus);
       }
     }
+    
+    // Always return a cleanup function
+    return () => {};
   }, [permissionStatus]); // Add permissionStatus as dependency
 
   // Check initial permission status
