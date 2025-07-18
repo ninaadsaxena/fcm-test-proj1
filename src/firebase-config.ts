@@ -109,5 +109,3 @@ try {
 if (typeof window !== 'undefined') {
   (window as typeof window & { firebase?: { app: FirebaseApp | null; messaging: Messaging | null } }).firebase = { app, messaging };
 }
-
-export { messaging, vapidKey, getToken, onMessage };
